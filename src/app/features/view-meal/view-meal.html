@@ -1,0 +1,76 @@
+<div class="container">
+  <div class="meal-page">
+    <header class="meal-header">
+      <div class="meal-heading">
+        <h1>{{ meal().name }}</h1>
+        <p class="meal-subtitle">{{ meal().description }}</p>
+      </div>
+      <button class="edit-button" type="button" [routerLink]="['/edit-meal', meal().id]">
+        <span class="edit-icon">✎</span>
+        Edit
+      </button>
+    </header>
+
+    <div class="meal-card">
+      <div class="meal-overview">
+        <div class="section-heading">
+          <h2>Meal details</h2>
+        </div>
+
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="detail-label">Meal type</span>
+            <span>{{meal().type}}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Cuisine</span>
+            <span>{{meal().cuisine}}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Servings</span>
+            <div class="servings-value">
+              <span class="servings-icon">♙</span>
+              <span>{{meal().numberOfServings}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="ingredients-section">
+        <div class="ingredients-heading">
+          <div>
+            <h2>Ingredients</h2>
+            <p class="section-description">
+              Everything you'll need to make this recipe.
+            </p>
+          </div>
+
+          <span class="ingredient-count">{{meal().ingredients?.length}} ingredients</span>
+        </div>
+        @if (meal().ingredients?.length! > 0) {
+          <div class="ingredients-list">
+            @for (ingredient of meal().ingredients; track ingredient.ingredientId) {
+              <div class="ingredient-row">
+                <span class="ingredient-name">{{ingredient.name}}</span>
+                @if (ingredient.quantity > 0) {
+                <span class="ingredient-quantity">
+                   {{ingredient.quantity}}
+                  {{ingredient.unit !== UnitOfMeasurement.None ? ingredient.unit : ''}}
+                </span>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-ingredients">
+            There are no ingredients yet.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

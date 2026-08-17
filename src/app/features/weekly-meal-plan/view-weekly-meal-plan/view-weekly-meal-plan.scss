@@ -1,0 +1,67 @@
+.week-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+
+  h2 {
+    margin: 0 0 0 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+}
+
+.test.mat-mdc-standard-chip {
+  --mat-chip-label-text-size: 10px;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .meals {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+}
+
+.day {
+  padding: 8px;
+  border-right: 1px solid #ddd;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .weekday {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #666;
+  }
+
+  .date {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+  }
+
+  &.today .date {
+    background: #1a73e8;
+    color: white;
+  }
+}
+

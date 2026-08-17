@@ -1,0 +1,35 @@
+<div class="week-header">
+  <button class="outlined-button" type="button" (click)="shiftWeek(-1)" aria-label="Previous week">‹</button>
+  <button class="outlined-button" type="button" (click)="goToToday()">Today</button>
+  <button class="outlined-button" type="button" (click)="shiftWeek(1)" aria-label="Next week">›</button>
+
+  <div class="date-range">
+    {{ days()[0].date | date: 'MMM d' }} – {{ days()[6].date | date: 'MMM d, y' }}
+  </div>
+
+  <button class="filled-button" type="button" [disabled]="isSaving()" (click)="onSave()">
+    {{ isSaving() ? 'Saving...' : 'Save' }}
+  </button>
+</div>
+
+<div class="week-grid">
+  @for (day of days(); track day.date.getTime()) {
+    <section class="day" [class.today]="isToday(day.date)">
+      <header>
+        <span class="weekday">{{ day.date | date: 'EEE' }}</span>
+        <span class="date">{{ day.date | date: 'd' }}</span>
+      </header>
+
+      @let dayMeals = getMealsForDay(day.dayOfWeek);
+      @if (dayMeals.length > 0) {
+        <div class="meals">
+          <mat-chip-set>
+            @for (item of dayMeals; track item.sortOrder + '-' + item.mealName) {
+              <mat-chip>{{ item.mealName }}</mat-chip>
+            }
+          </mat-chip-set>
+        </div>
+      }
+    </section>
+  }
+</div>

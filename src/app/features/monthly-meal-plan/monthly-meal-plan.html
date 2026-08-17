@@ -1,0 +1,51 @@
+<div class="calendar-container container">
+  <div class="calendar-header">
+    <button class="outlined-button" type="button" (click)="shiftMonth(-1)" aria-label="Previous month">‹</button>
+    <button class="outlined-button" type="button" (click)="goToToday()">Today</button>
+    <button class="outlined-button" type="button" (click)="shiftMonth(1)" aria-label="Next month">›</button>
+
+    <div class="month-title">
+      {{ currentDate() | date: 'MMMM y' }}
+    </div>
+
+    <button class="filled-button" type="button" [routerLink]="['/create-meal-plan']" routerLinkActive="active">
+      Create Weekly Meal Plan
+    </button>
+  </div>
+
+  <div class="weekdays-grid">
+    @for (weekday of weekdays; track weekday) {
+      <div class="weekday-header">{{ weekday }}</div>
+    }
+  </div>
+
+  <div class="calendar-grid">
+    @for (day of days(); track day.date.getTime()) {
+      <div
+        class="calendar-day"
+        [class.other-month]="!day.isCurrentMonth"
+        [class.today]="day.isToday"
+        [class.selected]="day.isSelected"
+        (click)="selectDate(day.date)"
+        tabindex="0"
+        (keydown.enter)="selectDate(day.date)"
+        (keydown.space)="selectDate(day.date); $event.preventDefault()"
+        [attr.aria-label]="day.date | date: 'fullDate'"
+      >
+        <div class="day-header">
+          <span class="day-number">{{ day.dayNumber }}</span>
+        </div>
+
+        @if (day.meals.length > 0) {
+          <div class="meals">
+            <mat-chip-set>
+              @for (item of day.meals; track item.sortOrder + '-' + item.mealName) {
+                <mat-chip>{{ item.mealName }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

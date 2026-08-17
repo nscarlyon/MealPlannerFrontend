@@ -1,0 +1,91 @@
+<app-view-weekly-meal-plan
+  [weekStartDate]="currentMonday()"
+  (weekStartDateChange)="onWeekChange($event)"
+  [weeklyMeals]="weeklyMeals()"
+  [isSaving]="isSaving()"
+  (save)="onSavePlan()"
+/>
+
+<div class="container">
+  @if (loadErrorMessage(); as message) {
+    <div class="load-error" role="alert">
+      <span>{{ message }}</span>
+      <button type="button" class="retry-button" (click)="retryLoad()">Retry</button>
+    </div>
+  }
+
+  <div class="header">Meals to Plan</div>
+  <div class="header-text">
+    Drag a weekday onto the meal card to add it to the weekly meal plan.
+  </div>
+
+  @for (meal of meals(); track meal.mealId) {
+    <mat-card
+      class="meal-card"
+      [id]="meal.mealId"
+      cdkDropList
+      [cdkDropListData]="meal"
+      (cdkDropListDropped)="onMealListDropped($event)">
+      <mat-card-header>
+        {{ meal.name }}
+      </mat-card-header>
+
+      <mat-card-content>
+        {{ meal.type }}
+        @if (meal.cuisine) {
+          | {{ meal.cuisine }}
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <mat-chip-set>
+          @for (day of meal.assignedDays; track day.planDate) {
+            <mat-chip [class]="day.className" (removed)="removeDayChip(meal.mealId, day)">
+              {{ day.dayOfWeekLabel }}
+              <button matChipRemove [attr.aria-label]="'Remove ' + meal.name + ' from ' + day.dayOfWeekLabel">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip>
+          }
+        </mat-chip-set>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <div class="list-end" appInViewport
+    [inViewportRecheckOn]="meals().length"
+    (inViewportChange)="onListEndVisibilityChange($event)">
+    <span aria-live="polite">
+      @if (isLoadingMeals()) {
+        Loading meals…
+      } @else if (hasMoreMeals() && !loadErrorMessage()) {
+        <button type="button" class="load-more-button" (click)="loadMoreMeals()">
+          Load more meals
+        </button>
+      }
+    </span>
+  </div>
+</div>
+
+<aside
+  #dayList="cdkDropList"
+  cdkDropList
+  [cdkDropListData]="dayPills()"
+  [cdkDropListConnectedTo]="mealIds()"
+  [cdkDropListSortingDisabled]="true"
+  [cdkDropListHasAnchor]="true"
+  class="fixed-day-pills"
+  aria-label="Days of the week">
+  @for (day of dayPills(); track day.label) {
+    <button
+      cdkDrag
+      [cdkDragData]="day"
+      type="button"
+      class="day-pill"
+      [class]="day.className"
+      [attr.aria-label]="day.name"
+      [matBadge]="day.numberOfMeals || ''">
+      {{ day.label }}
+    </button>
+  }
+</aside>

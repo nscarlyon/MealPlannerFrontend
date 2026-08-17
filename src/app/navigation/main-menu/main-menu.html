@@ -1,0 +1,26 @@
+<div class="bottom-menu" [class.hidden]="isHidden()">
+  <button mat-button [routerLink]="['/meal-plan']" routerLinkActive="active">
+    <mat-icon>calendar_today</mat-icon>
+  </button>
+  <button mat-button [routerLink]="['/meals']" routerLinkActive="active">
+    <mat-icon>restaurant</mat-icon>
+  </button>
+  <button mat-button [routerLink]="['/shopping-list']" routerLinkActive="active">
+    <mat-icon>shopping_cart</mat-icon>
+  </button>
+</div>
+
+<nav class="sidebar-nav" aria-label="Sidebar navigation">
+  <button mat-button [routerLink]="['/meal-plan']" routerLinkActive="active">
+    <mat-icon>calendar_today</mat-icon>
+    <span>Meal Plan</span>
+  </button>
+  <button mat-button [routerLink]="['/meals']" routerLinkActive="active">
+    <mat-icon>restaurant</mat-icon>
+    <span>Meals</span>
+  </button>
+  <button mat-button [routerLink]="['/shopping-list']" routerLinkActive="active">
+    <mat-icon>shopping_cart</mat-icon>
+    <span>Shopping List</span>
+  </button>
+</nav>

@@ -1,0 +1,41 @@
+<div mat-dialog-title>Filter Meals</div>
+<mat-dialog-content>
+  <mat-chip-listbox aria-label="select filters" multiple>
+    @for (mealType of mealTypes; track mealType) {
+      <mat-chip-option
+        [value]="mealType.value"
+        [selected]="mealType.selected"
+        (selectionChange)="onSelectFilter($event)">
+        {{ mealType.label }}
+      </mat-chip-option>
+    }
+    @for (cuisineType of cuisineTypes; track cuisineType) {
+      <mat-chip-option
+        [value]="cuisineType.value"
+        [selected]="cuisineType.selected"
+        (selectionChange)="onSelectFilter($event)">
+        {{ cuisineType.label }}
+      </mat-chip-option>
+    }
+  </mat-chip-listbox>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button
+    mat-dialog-close
+    class="outlined-button clickable"
+    aria-label="Cancel"
+  >
+    <span>Cancel</span>
+  </button>
+  <button
+    (click)="onSave()"
+    class="filled-button clickable"
+    aria-label="Add filters"
+  >
+    <span>Save</span>
+  </button>
+</mat-dialog-actions>
+
+
+
+

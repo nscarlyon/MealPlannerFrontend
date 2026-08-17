@@ -1,0 +1,11 @@
+.page-content {
+  margin-top: 10px;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+
+  @media (min-width: 768px) {
+    margin-left: 220px;
+    padding-bottom: 24px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

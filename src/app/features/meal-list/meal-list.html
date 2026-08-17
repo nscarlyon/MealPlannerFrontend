@@ -1,0 +1,85 @@
+<div class="header-container">
+  <div class="header">Meals</div>
+  <button
+    class="add-meal-button"
+    routerLink="/meals/add"
+    aria-label="Add meal"
+  >
+    <mat-icon>add</mat-icon>
+    <span>Add Meal</span>
+  </button>
+</div>
+<div class="container">
+  <div class="search-bar-wrapper">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+      <mat-icon matIconPrefix (click)="openFilterDialog()" class="clickable">filter_list</mat-icon>
+      <mat-label>Search meals</mat-label>
+      <mat-chip-grid #chipGrid>
+        @for(mealType of mealTypeFilters(); track mealType) {
+          <mat-chip-row
+            (removed)="removeMealFilter(mealType)"
+            [aria-description]="mealType">
+            {{mealType}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+        @for(cuisine of cuisineFilters(); track cuisine) {
+          <mat-chip-row
+            (removed)="removeCuisineFilter(cuisine)"
+            [aria-description]="cuisine">
+            {{cuisine}}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+      <input matInput
+             [matChipInputFor]="chipGrid"
+             (input)="applyFilter($event)"
+             placeholder="Search by name..."
+             #input>
+    </mat-form-field>
+  </div>
+  @if (mealsResource.isLoading()) {
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  } @else if (meals().length === 0 || mealsResource.error()) {
+    <div class="no-meals">No meals found</div>
+  } @else {
+    <table class="table-container" mat-table [dataSource]="meals()" matSort (matSortChange)="onSortChange($event)">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name">
+          Name
+        </th>
+        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+      </ng-container>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          Type
+        </th>
+        <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+      </ng-container>
+      <ng-container matColumnDef="cuisine">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          Cuisine
+        </th>
+        <td mat-cell *matCellDef="let element"> {{element.cuisine}} </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+      <tr class="clickable" mat-row *matRowDef="let myRowData; columns: columnsToDisplay" [routerLink]="[myRowData.id]"></tr>
+    </table>
+    <mat-paginator [length]="totalCount()"
+                   [pageSize]="pageSize()"
+                   [pageIndex]="pageIndex()"
+                   [pageSizeOptions]="[10, 20, 50, 100]"
+                   [showFirstLastButtons]="true"
+                   (page)="onPageChange($event)"
+                   aria-label="Select page">
+    </mat-paginator>
+  }
+</div>
+
+
+
