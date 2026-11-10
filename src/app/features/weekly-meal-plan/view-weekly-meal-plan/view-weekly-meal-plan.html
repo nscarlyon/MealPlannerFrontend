@@ -20,7 +20,7 @@
         <span class="date">{{ day.date | date: 'd' }}</span>
       </header>
 
-      @let dayMeals = getMealsForDay(day.dayOfWeek);
+      @let dayMeals = mealsByDate().get(day.dateKey) ?? [];
       @if (dayMeals.length > 0) {
         <div class="meals">
           <mat-chip-set>

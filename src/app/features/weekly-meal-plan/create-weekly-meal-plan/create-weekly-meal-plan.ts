@@ -179,8 +179,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     }));
   });
 
-  // ToDo Move to viewWeeklyMeals? mealNames & weeklyMeals?
-  private readonly mealNames = computed(() => {
+  private readonly mealNamesById = computed(() => {
     const names = new Map<string, string>();
     for (const item of this.loadedWeek()?.plan?.items ?? []) names.set(item.mealId, item.meal.name);
     for (const meal of this.availableMeals()) names.set(meal.id, meal.name);
@@ -188,9 +187,8 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
   });
 
   readonly weeklyMeals = computed<DailyMealPlanItem[]>(() => {
-    const names = this.mealNames();
-    return [...this.editablePlanItems()].sort(bySortOrder).map((item) => ({
-      day: item.day,
+    const names = this.mealNamesById();
+    return [...this.editablePlanItems()].map((item) => ({
       date: DateHelper.parseDate(item.date),
       mealName: names.get(item.mealId) ?? 'Unknown meal',
       sortOrder: item.sortOrder,

@@ -67,7 +67,6 @@ export class MonthlyMealPlan {
         const key = DateHelper.getFormattedDate(date);
 
         const mealItem: DailyMealPlanItem = {
-          day: item.day,
           mealName: item.meal?.name ?? '',
           date,
           sortOrder: item.sortOrder,
