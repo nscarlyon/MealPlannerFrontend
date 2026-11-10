@@ -124,7 +124,7 @@ describe('CreateWeeklyMealPlan', () => {
       await (component as any).loadMoreMeals();
       await (component as any).loadMoreMeals();
 
-      expect(component.mealIds()).toEqual(['a', 'b', 'c', 'd']);
+      expect(component.mealIdsForDropListConnection()).toEqual(['a', 'b', 'c', 'd']);
     });
 
     it('only loads a page when asked, and stops after the last one', async () => {

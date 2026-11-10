@@ -148,7 +148,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     () => new Map(this.dayPills().map((pill) => [DateHelper.getFormattedDate(pill.date), pill])),
   );
 
-  protected readonly mealIds = computed(() => this.availableMeals().map((meal) => meal.id));
+  protected readonly mealIdsForDropListConnection = computed(() => this.availableMeals().map((meal) => meal.id));
   readonly meals = computed<DragAndDropMealItem[]>(() => {
     const items = this.editablePlanItems();
     const pillsByDate = this.dayPillsByDate();
