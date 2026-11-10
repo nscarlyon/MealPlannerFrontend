@@ -74,7 +74,7 @@ describe('CreateWeeklyMealPlan', () => {
   it('should not add the same meal to the same day twice', () => {
     drop(0, 'meal-1');
     drop(0, 'meal-1');
-    expect(component.planItems().length).toBe(1);
+    expect(component.editablePlanItems().length).toBe(1);
     expect(component.hasUnsavedChanges()).toBe(true);
   });
 
@@ -82,11 +82,11 @@ describe('CreateWeeklyMealPlan', () => {
     drop(0, 'meal-1');
     drop(0, 'meal-2');
     drop(0, 'meal-3');
-    const date = component.planItems()[0].date;
+    const date = component.editablePlanItems()[0].date;
 
     (component as any).removeDayChip('meal-1', { planDate: date, sortOrder: 0 });
 
-    expect(component.planItems().map((i) => [i.mealId, i.sortOrder])).toEqual([
+    expect(component.editablePlanItems().map((i) => [i.mealId, i.sortOrder])).toEqual([
       ['meal-2', 0],
       ['meal-3', 1],
     ]);
