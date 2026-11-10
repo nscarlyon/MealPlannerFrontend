@@ -1,6 +1,12 @@
 import { MealPlanItemRequest, WeeklyMealPlanResponse } from '../../../api/models';
 
-export function planSignature(items: MealPlanItemRequest[]): string {
+export function arePlansDifferent(
+  editablePlanItems: MealPlanItemRequest[],
+  originalPlanItems: MealPlanItemRequest[],
+): boolean {
+  return planSignature(editablePlanItems) !== planSignature(originalPlanItems);
+}
+function planSignature(items: MealPlanItemRequest[]): string {
   return items
     .map((item) => `${item.mealId}|${item.date}|${item.sortOrder}`)
     .sort()

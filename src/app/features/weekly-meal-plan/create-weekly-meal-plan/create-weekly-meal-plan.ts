@@ -32,7 +32,7 @@ import { DayPill, DayPillHelper } from '../day-pill';
 import { DragAndDropDay, DragAndDropMealItem } from '../drag-and-drop-meal-item';
 import { DailyMealPlanItem } from '../view-weekly-meal-plan/daily-meal-plan-item';
 import { ViewWeeklyMealPlan } from '../view-weekly-meal-plan/view-weekly-meal-plan';
-import { bySortOrder, planSignature, toItemRequests } from './create-weekly-meal-helpers';
+import { arePlansDifferent, bySortOrder, toItemRequests } from './create-weekly-meal-helpers';
 
 
 @Component({
@@ -101,10 +101,6 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     () => !this.weeklyMealPlanResource.isLoading() && !this.weeklyMealPlanResource.error(),
   );
 
-  private readonly loadedPlan = computed(() =>
-    this.weeklyMealPlanResource.hasValue() ? this.weeklyMealPlanResource.value() : undefined,
-  );
-
   protected readonly loadErrorMessage = computed(() => {
     if (this.mealsLoadFailed()) return "Couldn't load your meals.";
     if (this.weeklyMealPlanResource.error()) return "Couldn't load this week's meal plan.";
@@ -113,27 +109,27 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
 
   private readonly loadedWeek = computed(() => ({
     week: this.weekStartDate(),
-    plan: this.loadedPlan(),
+    plan: this.weeklyMealPlanResource.hasValue() ? this.weeklyMealPlanResource.value() : undefined,
   }));
 
-  readonly planId = linkedSignal({
+  readonly loadedPlanId = linkedSignal({
     source: this.loadedWeek,
     computation: ({ plan }): string | undefined => plan?.id,
   });
 
-  private readonly savedItems = linkedSignal({
+  private readonly originalPlanItems = linkedSignal({
     source: this.loadedWeek,
     computation: ({ plan }) => toItemRequests(plan),
   });
 
-  readonly planItems = linkedSignal(() => this.savedItems());
+  readonly editablePlanItems = linkedSignal(() => this.originalPlanItems());
 
-  readonly hasUnsavedChanges = computed(
-    () => planSignature(this.planItems()) !== planSignature(this.savedItems()),
+  readonly hasUnsavedChanges = computed(() =>
+    arePlansDifferent(this.editablePlanItems(), this.originalPlanItems()),
   );
 
   readonly dayPills = computed<DayPill[]>(() => {
-    const items = this.planItems();
+    const items = this.editablePlanItems();
     return DayPillHelper.getDayPills(this.currentMonday()).map((pill) => {
       const date = DateHelper.getFormattedDate(pill.date);
       return { ...pill, numberOfMeals: items.filter((item) => item.date === date).length };
@@ -144,7 +140,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
   );
   readonly mealIds = computed(() => this.availableMeals().map((meal) => meal.id));
   readonly meals = computed<DragAndDropMealItem[]>(() => {
-    const items = this.planItems();
+    const items = this.editablePlanItems();
     const pillsByDate = this.pillsByDate();
 
     return this.availableMeals().map((meal) => ({
@@ -167,16 +163,17 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     }));
   });
 
+  // ToDo Move to viewWeeklyMeals? mealNames & weeklyMeals?
   private readonly mealNames = computed(() => {
     const names = new Map<string, string>();
-    for (const item of this.loadedPlan()?.items ?? []) names.set(item.mealId, item.meal.name);
+    for (const item of this.loadedWeek()?.plan?.items ?? []) names.set(item.mealId, item.meal.name);
     for (const meal of this.availableMeals()) names.set(meal.id, meal.name);
     return names;
   });
 
   readonly weeklyMeals = computed<DailyMealPlanItem[]>(() => {
     const names = this.mealNames();
-    return [...this.planItems()].sort(bySortOrder).map((item) => ({
+    return [...this.editablePlanItems()].sort(bySortOrder).map((item) => ({
       day: item.day,
       date: DateHelper.parseDate(item.date),
       mealName: names.get(item.mealId) ?? 'Unknown meal',
@@ -261,7 +258,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     const mealId = event.container.data.mealId;
     const date = DateHelper.getFormattedDate(dayPill.date);
 
-    this.planItems.update((items) => {
+    this.editablePlanItems.update((items) => {
       const sameDay = items.filter((item) => item.date === date);
       // A meal only needs to be planned once per day.
       if (sameDay.some((item) => item.mealId === mealId)) return items;
@@ -270,7 +267,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
   }
 
   protected removeDayChip(mealId: string, day: DragAndDropDay): void {
-    this.planItems.update((items) => {
+    this.editablePlanItems.update((items) => {
       const remaining = items.filter(
         (item) => !(item.mealId === mealId && item.date === day.planDate),
       );
@@ -288,20 +285,20 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     if (this.isSaving() || !this.isPlanLoaded()) return;
 
     const weekStartDate = this.weekStartDate();
-    const items = this.planItems();
+    const items = this.editablePlanItems();
     const payload: WeeklyMealPlanRequest = { weekStartDate, items };
     const isStillOnWeek = () => this.weekStartDate() === weekStartDate;
 
     this.isSaving.set(true);
     try {
-      const id = this.planId();
+      const id = this.loadedPlanId();
       if (id) {
         await firstValueFrom(this.weeklyMealPlanService.putApiWeeklyMealPlanId(id, payload));
       } else {
         const created = await firstValueFrom(
           this.weeklyMealPlanService.postApiWeeklyMealPlan(payload),
         );
-        if (created?.id && isStillOnWeek()) this.planId.set(created.id);
+        if (created?.id && isStillOnWeek()) this.loadedPlanId.set(created.id);
       }
 
       if (isStillOnWeek()) this.markSaved(items);
@@ -316,8 +313,8 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
   }
 
   private markSaved(items: MealPlanItemRequest[]): void {
-    const current = this.planItems();
-    this.savedItems.set(items);
-    this.planItems.set(current);
+    const current = this.editablePlanItems();
+    this.originalPlanItems.set(items);
+    this.editablePlanItems.set(current);
   }
 }
