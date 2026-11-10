@@ -111,13 +111,13 @@ describe('CreateWeeklyMealPlan', () => {
     });
 
     it('appends the next page, without duplicates, when the end of the list is visible', async () => {
-      expect(component.meals().map((m) => m.mealId)).toEqual(['a', 'b']);
+      expect(component.mealsDropList().map((m) => m.mealId)).toEqual(['a', 'b']);
 
       (component as any).onListEndVisibilityChange(true);
       await fixture.whenStable();
 
       expect(mealsServiceMock.getApiMeals).toHaveBeenLastCalledWith({ PageNumber: 2, PageSize: 20 });
-      expect(component.meals().map((m) => m.mealId)).toEqual(['a', 'b', 'c']);
+      expect(component.mealsDropList().map((m) => m.mealId)).toEqual(['a', 'b', 'c']);
     });
 
     it('keeps every page when pages load back-to-back without the list being read', async () => {
