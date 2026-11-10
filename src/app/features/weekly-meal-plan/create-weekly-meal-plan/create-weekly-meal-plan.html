@@ -19,7 +19,7 @@
     Drag a weekday onto the meal card to add it to the weekly meal plan.
   </div>
 
-  @for (meal of meals(); track meal.mealId) {
+  @for (meal of mealsDropList(); track meal.mealId) {
     <mat-card
       class="meal-card"
       [id]="meal.mealId"
@@ -53,7 +53,7 @@
   }
 
   <div class="list-end" appInViewport
-    [inViewportRecheckOn]="meals().length"
+    [inViewportRecheckOn]="mealsDropList().length"
     (inViewportChange)="onListEndVisibilityChange($event)">
     <span aria-live="polite">
       @if (isLoadingMeals()) {

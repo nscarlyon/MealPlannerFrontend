@@ -148,22 +148,28 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     () => new Map(this.dayPills().map((pill) => [DateHelper.getFormattedDate(pill.date), pill])),
   );
 
-  protected readonly mealIdsForDropListConnection = computed(() => this.availableMeals().map((meal) => meal.id));
-  readonly meals = computed<DragAndDropMealItem[]>(() => {
+  readonly mealIdsForDropListConnection = computed(() => this.availableMeals().map((meal) => meal.id));
+  readonly mealsDropList = computed<DragAndDropMealItem[]>(() => {
     const items = this.editablePlanItems();
     const pillsByDate = this.dayPillsByDate();
+    const itemsById = new Map<string, MealPlanItemRequest[]>();
+
+    items.forEach((mealPlanItemRequest) => {
+      const mealPlanItemRequests = itemsById.get(mealPlanItemRequest.mealId) ?? [];
+      mealPlanItemRequests.push(mealPlanItemRequest);
+      itemsById.set(mealPlanItemRequest.mealId, mealPlanItemRequests);
+    })
 
     return this.availableMeals().map((meal) => ({
       mealId: meal.id,
       name: meal.name,
       type: meal.type,
       cuisine: meal.cuisine,
-      assignedDays: items
-        .filter((item) => item.mealId === meal.id)
+      assignedDays: (itemsById.get(meal.id) ?? [])
         .map((item): DragAndDropDay => {
           const pill = pillsByDate.get(item.date);
           return {
-            dayOfWeekLabel: pill?.label ?? item.day.substring(0, 2),
+            dayOfWeekLabel: pill!.label, // pill should never be undefined
             planDate: item.date,
             sortOrder: item.sortOrder,
             className: pill?.className ?? 'pill-default',
