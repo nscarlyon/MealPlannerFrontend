@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   linkedSignal,
   PendingTasks,
@@ -15,7 +16,7 @@ import { MatChip, MatChipRemove, MatChipSet } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { firstValueFrom } from 'rxjs';
+import { finalize, firstValueFrom, tap } from 'rxjs';
 
 import { MealsService } from '../../../api/generated/meals/meals.service';
 import { WeeklyMealPlanService } from '../../../api/generated/weekly-meal-plan/weekly-meal-plan.service';
@@ -33,6 +34,7 @@ import { DragAndDropDay, DragAndDropMealItem } from '../drag-and-drop-meal-item'
 import { DailyMealPlanItem } from '../view-weekly-meal-plan/daily-meal-plan-item';
 import { ViewWeeklyMealPlan } from '../view-weekly-meal-plan/view-weekly-meal-plan';
 import { arePlansDifferent, bySortOrder, toItemRequests } from './create-weekly-meal-helpers';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 
 @Component({
@@ -61,6 +63,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly pendingTasks = inject(PendingTasks);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly currentMonday = signal<Date>(DateHelper.getMondayFromToday(new Date()));
   readonly isSaving = signal(false);
@@ -301,28 +304,34 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     const items = this.editablePlanItems();
     const payload: WeeklyMealPlanRequest = { weekStartDate, items };
     const isStillOnWeek = () => this.weekStartDate() === weekStartDate;
-
     this.isSaving.set(true);
-    try {
-      const id = this.loadedPlanId();
-      if (id) {
-        await firstValueFrom(this.weeklyMealPlanService.putApiWeeklyMealPlanId(id, payload));
-      } else {
-        const created = await firstValueFrom(
-          this.weeklyMealPlanService.postApiWeeklyMealPlan(payload),
-        );
-        if (created?.id && isStillOnWeek()) this.loadedPlanId.set(created.id);
-      }
+    const id = this.loadedPlanId();
 
-      if (isStillOnWeek()) this.markSaved(items);
-    } catch (err) {
-      console.error('Failed to save meal plan:', err);
-      this.snackBar.open("Couldn't save your meal plan. Please try again.", 'Close', {
-        duration: 5000,
+    const save$ = id
+      ? this.weeklyMealPlanService.putApiWeeklyMealPlanId(id, payload)
+      : this.weeklyMealPlanService.postApiWeeklyMealPlan(payload).pipe(
+          tap((created) => {
+            if (created?.id && isStillOnWeek()) this.loadedPlanId.set(created.id);
+          }),
+        );
+
+    save$
+      .pipe(
+        finalize(() => this.isSaving.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          if (isStillOnWeek()) this.markSaved(items);
+          this.snackBar.open('Your meal plan was saved successfully.', 'Close', { duration: 3000 });
+        },
+        error: (err) => {
+          console.error('Failed to save meal plan:', err);
+          this.snackBar.open("Couldn't save your meal plan. Please try again.", 'Close', {
+            duration: 5000,
+          });
+        },
       });
-    } finally {
-      this.isSaving.set(false);
-    }
   }
 
   private markSaved(items: MealPlanItemRequest[]): void {
