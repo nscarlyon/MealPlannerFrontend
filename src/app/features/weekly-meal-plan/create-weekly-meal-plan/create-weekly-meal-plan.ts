@@ -133,11 +133,8 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     const mealCountsByDate = new Map<string, number>();
 
     items.forEach((item) => {
-      mealCountsByDate.set(
-        item.date,
-        (mealCountsByDate.get(item.date) ?? 0) + 1
-      );
-    })
+      mealCountsByDate.set(item.date, (mealCountsByDate.get(item.date) ?? 0) + 1);
+    });
 
     return DayPillHelper.getDayPills(this.currentMonday()).map((pill) => {
       const date = DateHelper.getFormattedDate(pill.date);
@@ -148,7 +145,9 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     () => new Map(this.dayPills().map((pill) => [DateHelper.getFormattedDate(pill.date), pill])),
   );
 
-  readonly mealIdsForDropListConnection = computed(() => this.availableMeals().map((meal) => meal.id));
+  readonly mealIdsForDropListConnection = computed(() =>
+    this.availableMeals().map((meal) => meal.id),
+  );
   readonly mealsDropList = computed<DragAndDropMealItem[]>(() => {
     const items = this.editablePlanItems();
     const pillsByDate = this.dayPillsByDate();
@@ -158,7 +157,7 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
       const mealPlanItemRequests = itemsById.get(mealPlanItemRequest.mealId) ?? [];
       mealPlanItemRequests.push(mealPlanItemRequest);
       itemsById.set(mealPlanItemRequest.mealId, mealPlanItemRequests);
-    })
+    });
 
     return this.availableMeals().map((meal) => ({
       mealId: meal.id,
@@ -272,11 +271,11 @@ export class CreateWeeklyMealPlan implements HasUnsavedChanges {
     const mealId = event.container.data.mealId;
     const date = DateHelper.getFormattedDate(dayPill.date);
 
-    this.editablePlanItems.update((items) => {
+    this.editablePlanItems.update((items): MealPlanItemRequest[] => {
       const sameDay = items.filter((item) => item.date === date);
       // A meal only needs to be planned once per day.
       if (sameDay.some((item) => item.mealId === mealId)) return items;
-      return [...items, { mealId, day: dayPill.name, date, sortOrder: sameDay.length }];
+      return [...items, { mealId, date, sortOrder: sameDay.length }];
     });
   }
 

@@ -4,11 +4,9 @@
  * MealPlanner.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { DayOfWeek } from './dayOfWeek';
 
 export interface MealPlanItemRequest {
   id?: string;
-  day: DayOfWeek;
   date: string;
   sortOrder: number;
   mealId: string;

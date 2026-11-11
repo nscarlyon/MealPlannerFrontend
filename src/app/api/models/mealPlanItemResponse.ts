@@ -4,12 +4,10 @@
  * MealPlanner.Api | v1
  * OpenAPI spec version: 1.0.0
  */
-import type { DayOfWeek } from './dayOfWeek';
 import type { MealResponse } from './mealResponse';
 
 export interface MealPlanItemResponse {
   id: string;
-  day: DayOfWeek;
   date: string;
   sortOrder: number;
   mealId: string;

@@ -16,7 +16,6 @@ function planSignature(items: MealPlanItemRequest[]): string {
 export function toItemRequests(plan: WeeklyMealPlanResponse | undefined): MealPlanItemRequest[] {
   return (plan?.items ?? []).map((item) => ({
     mealId: item.mealId,
-    day: item.day,
     date: item.date,
     sortOrder: item.sortOrder,
   }));
