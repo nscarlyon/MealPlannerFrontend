@@ -175,7 +175,6 @@ describe('MonthlyMealPlan', () => {
           items: [
             {
               id: 'item-1',
-              day: DayOfWeek.Thursday,
               date: '2026-10-15',
               sortOrder: 1,
               mealId: 'meal-1',
@@ -183,7 +182,6 @@ describe('MonthlyMealPlan', () => {
             },
             {
               id: 'item-2',
-              day: DayOfWeek.Thursday,
               date: '2026-10-15',
               sortOrder: 0,
               mealId: 'meal-2',
@@ -191,7 +189,6 @@ describe('MonthlyMealPlan', () => {
             },
             {
               id: 'item-3',
-              day: DayOfWeek.Friday,
               date: '2026-10-16',
               sortOrder: 0,
               mealId: 'meal-3',
@@ -245,7 +242,6 @@ describe('MonthlyMealPlan', () => {
           items: [
             {
               id: 'item-1',
-              day: DayOfWeek.Thursday,
               date: '',
               sortOrder: 0,
               mealId: 'meal-1',
@@ -344,7 +340,6 @@ describe('MonthlyMealPlan', () => {
           items: [
             {
               id: 'item-1',
-              day: DayOfWeek.Thursday,
               date: '2026-10-15',
               sortOrder: 0,
               mealId: 'meal-1',
