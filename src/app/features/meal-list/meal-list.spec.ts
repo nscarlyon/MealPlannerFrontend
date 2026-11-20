@@ -116,13 +116,22 @@ describe('MealList', () => {
     expect(filterIcon.textContent.trim()).toBe('filter_list');
   });
 
-  it('should filter dataSource when applyFilter is called', () => {
-    const event = {
-      target: { value: '  SPAGHETTI  ' },
-    } as unknown as Event;
+  it('should refetch from the first page when filters change in the shared state', async () => {
+    component.pageIndex.set(3);
+    component.searchState.mealTypeFilters.set([MealType.Dinner]);
+    expect(component.pageIndex()).toBe(0);
 
-    component.applyFilter(event);
-    expect(component.searchInput()).toBe('SPAGHETTI');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(mealsServiceMock.getApiMeals).toHaveBeenLastCalledWith({
+      PageNumber: 1,
+      PageSize: 10,
+      IsDescending: undefined,
+      SearchTerm: '',
+      FilterByCuisineTypeList: [],
+      FilterByMealTypeList: [MealType.Dinner],
+    });
   });
 
   it('should handle empty or null meals in response gracefully', async () => {
